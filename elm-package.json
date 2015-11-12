@@ -1,5 +1,5 @@
 {
-    "version": "0.0.1",
+    "version": "1.0.0",
     "summary": "Datomic driver for the elm platform",
     "repository": "https://github.com/Istar-Eldritch/elm-datomic.git",
     "license": "LGPL3",

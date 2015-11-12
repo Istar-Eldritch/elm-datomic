@@ -4,23 +4,34 @@ import Graphics.Element exposing (Element, show)
 
 import ElmTest.Test exposing (test, Test, suite)
 import ElmTest.Run as R
-import ElmTest.Assertion exposing (assert, assertEqual)
+import ElmTest.Assertion exposing (assert, assertEqual, Assertion)
 import ElmTest.Runner.Console exposing (runDisplay)
-import Console exposing (..)
-import Task
+-- import Console exposing (..)
+import Task exposing (..)
+import Datomic exposing (..)
+import Http
+
+main: Signal Element
+main =
+  Signal.map show response.signal
 
 
-tests : Test
-tests =
-    suite "A Test Suite"
-        [ test "Addition" (assertEqual (3 + 7) 10)
-        , test "String.left" (assertEqual "a" (String.left 1 "abcdefg"))
-        , test "This test should fail" (assert True)
-        ]
-
-console : IO ()
-console = runDisplay tests
+response: Signal.Mailbox String
+response =
+  Signal.mailbox ""
 
 
-port runner : Signal (Task.Task x ())
-port runner = Console.run console
+report: Http.Response -> Task x ()
+report msg =
+  Signal.send response.address (toString msg.value)
+
+
+port fetchDB : Task Http.RawError ()
+port fetchDB =
+  let db = DB "dev" "centola"
+      conn = Connection "datomicdb" 8001 db
+  in query conn
+      [ ("q", "[:find ?e ?v :in $ :where [?e :db/doc ?v]]")
+      , ("args", "[{:db/alias \"dev/centola\"}]")
+      ]
+    `andThen` report
