@@ -80,7 +80,7 @@ formHelper contents acc =
         value = snd h
         newContents = List.tail contents |> Maybe.withDefault []
         linkAcc = if String.isEmpty acc then acc else acc ++ "&"
-        newAcc = linkAcc ++ key ++ "=" ++ value
+        newAcc = linkAcc ++ uriEncode key ++ "=" ++ uriEncode value
     in formHelper newContents newAcc
 
 
