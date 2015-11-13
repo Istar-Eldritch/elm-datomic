@@ -21,8 +21,8 @@ datomic rest interface.
 
 import Http exposing (..)
 import Task exposing (..)
-import Maybe
 import String
+import List
 
 
 {-| A `Connection` represents the configuration neccessary to stablish a
@@ -70,23 +70,14 @@ uri_ conn = uri conn ++ "-/"
 urit: Connection DB -> String -> String
 urit conn t = uri conn ++ t ++ "/"
 
-
-formHelper: List (String, String) -> String -> String
-formHelper contents acc =
-  if List.isEmpty contents then acc
-  else
-    let h = List.head contents |> Maybe.withDefault ("", "")
-        key = fst h
-        value = snd h
-        newContents = List.tail contents |> Maybe.withDefault []
-        linkAcc = if String.isEmpty acc then acc else acc ++ "&"
-        newAcc = linkAcc ++ uriEncode key ++ "=" ++ uriEncode value
-    in formHelper newContents newAcc
+queryPair : (String,String) -> String
+queryPair (key,value) =
+  uriEncode key ++ "=" ++ uriEncode value
 
 
 formUrlEncode: List (String, String) -> Body
-formUrlEncode contents =
-  formHelper contents "" |> string
+formUrlEncode args =
+  String.join "&" (List.map queryPair args) |> string
 
 
 {-| Returns a task that abstracts the call to the specified uri -}
